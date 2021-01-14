@@ -7465,19 +7465,14 @@ static int setgid_create(void)
 		 * Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
 		 * bit needs to be stripped.
 		 */
-		if (is_xfs() && !xfs_irix_sgid_inherit_enabled()) {
-			if (!is_setgid(t_dir1_fd, FILE1, 0))
-				die("failure: is_setgid");
-		} else {
-			if (is_setgid(t_dir1_fd, FILE1, 0))
-				die("failure: is_setgid");
-		}
+		if (is_setgid(t_dir1_fd, FILE1, 0))
+			die("failure: is_setgid");
 
 		/* create directory */
 		if (mkdirat(t_dir1_fd, DIR1, 0000))
 			die("failure: create");
 
-		if (is_xfs() && xfs_irix_sgid_inherit_enabled()) {
+		if (xfs_irix_sgid_inherit_enabled()) {
 			/* We're not in_group_p(). */
 			if (is_setgid(t_dir1_fd, DIR1, 0))
 				die("failure: is_setgid");
@@ -7568,30 +7563,25 @@ static int setgid_create_idmapped(void)
 		if (file1_fd < 0)
 			die("failure: create");
 
-		if (is_xfs() && !xfs_irix_sgid_inherit_enabled()) {
-			if (!is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		} else {
-			/*
-			 * Neither in_group_p() nor capable_wrt_inode_uidgid()
-			 * so setgid bit needs to be stripped.
-			 */
-			if (is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		}
+		/*
+		 * Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
+		 * bit needs to be stripped.
+		 */
+		if (is_setgid(open_tree_fd, FILE1, 0))
+			die("failure: is_setgid");
 
 		/* create directory */
 		if (mkdirat(open_tree_fd, DIR1, 0000))
 			die("failure: create");
 
-		if (is_xfs() && xfs_irix_sgid_inherit_enabled()) {
+		if (xfs_irix_sgid_inherit_enabled()) {
 			/* We're not in_group_p(). */
 			if (is_setgid(open_tree_fd, DIR1, 0))
 				die("failure: is_setgid");
 		} else {
-			/* Directories always inherit the setgid bit. */
-			if (!is_setgid(open_tree_fd, DIR1, 0))
-				die("failure: is_setgid");
+		     /* Directories always inherit the setgid bit. */
+		     if (!is_setgid(open_tree_fd, DIR1, 0))
+		     	die("failure: is_setgid");
 		}
 
 		exit(EXIT_SUCCESS);
@@ -7733,23 +7723,18 @@ static int setgid_create_idmapped_in_userns(void)
 		if (file1_fd < 0)
 			die("failure: create");
 
-		if (is_xfs() && !xfs_irix_sgid_inherit_enabled()) {
-			if (!is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		} else {
-			/*
-			 * Neither in_group_p() nor capable_wrt_inode_uidgid()
-			 * so setgid bit needs to be stripped.
-			 */
-			if (is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		}
+		/*
+		 * Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
+		 * bit needs to be stripped.
+		 */
+		if (is_setgid(open_tree_fd, FILE1, 0))
+			die("failure: is_setgid");
 
 		/* create directory */
 		if (mkdirat(open_tree_fd, DIR1, 0000))
 			die("failure: create");
 
-		if (is_xfs() && xfs_irix_sgid_inherit_enabled()) {
+		if (xfs_irix_sgid_inherit_enabled()) {
 			/* We're not in_group_p(). */
 			if (is_setgid(open_tree_fd, DIR1, 0))
 				die("failure: is_setgid");
@@ -7804,24 +7789,19 @@ static int setgid_create_idmapped_in_userns(void)
 		if (file1_fd < 0)
 			die("failure: create");
 
-		if (is_xfs() && !xfs_irix_sgid_inherit_enabled()) {
-			if (!is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		} else {
-			/*
-			 * Neither in_group_p() nor capable_wrt_inode_uidgid()
-			 * so setgid bit needs to be stripped.
-			 */
-			if (is_setgid(open_tree_fd, FILE1, 0))
-				die("failure: is_setgid");
-		}
+		/*
+		 * Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
+		 * bit needs to be stripped.
+		 */
+		if (is_setgid(open_tree_fd, FILE1, 0))
+			die("failure: is_setgid");
 
 		/* create directory */
 		if (mkdirat(open_tree_fd, DIR1, 0000))
 			die("failure: create");
 
 		/* Directories always inherit the setgid bit. */
-		if (is_xfs() && xfs_irix_sgid_inherit_enabled()) {
+		if (xfs_irix_sgid_inherit_enabled()) {
 			/* We're not in_group_p(). */
 			if (is_setgid(open_tree_fd, DIR1, 0))
 				die("failure: is_setgid");
