@@ -17,11 +17,13 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
 _supported_fs generic
 _require_idmapped_mounts
 _require_test
+_require_scratch
 
 echo "Silence is golden"
 
 $here/src/idmapped-mounts/idmapped-mounts --test-core --device "$TEST_DEV" \
-	--mount "$TEST_DIR" --fstype "$FSTYP"
+	--mount "$TEST_DIR" --fstype "$FSTYP" --scratch-device "$SCRATCH_DEV" \
+	--scratch-mountpoint "$SCRATCH_MNT"
 
 status=$?
 exit

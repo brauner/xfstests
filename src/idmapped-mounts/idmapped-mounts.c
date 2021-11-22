@@ -13743,6 +13743,75 @@ out:
 	return fret;
 }
 
+static int fs_userns_mnt(void)
+{
+	int fret = -1;
+	int fd_userns = -EBADF, file1_fd = -EBADF;
+	pid_t pid;
+
+	rm_r(t_mnt_scratch_fd, ".");
+	rm_r(t_mnt_fd, ".");
+
+	/* create directory for rename test */
+	if (mkdirat(t_mnt_scratch_fd, DIR1, 0700)) {
+		log_stderr("failure: mkdirat");
+		goto out;
+	}
+
+	file1_fd = openat(t_mnt_scratch_fd, DIR1 "/" FILE1,
+			  O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+	if (file1_fd < 0) {
+		log_stderr("failure: openat");
+		goto out;
+	}
+
+	print_r(t_mnt_scratch_fd, "");
+	sys_umount2(t_mountpoint_scratch, MNT_DETACH);
+
+	/* create directory for rename test */
+	if (mkdirat(t_mnt_fd, DIR2, 0777)) {
+		log_stderr("failure: mkdirat");
+		goto out;
+	}
+
+	fd_userns = get_userns_fd(0, 10000, 10000);
+	if (fd_userns < 0) {
+		log_stderr("failure: get_userns_fd");
+		goto out;
+	}
+
+	pid = fork();
+	if (pid < 0) {
+		log_stderr("failure: fork");
+		goto out;
+	}
+	if (pid == 0) {
+		int fd_fs = -EBADF;
+
+		if (!switch_userns(fd_userns, 0, 0, false))
+			die("failure: switch_userns");
+
+		snprintf(t_buf, sizeof(t_buf), "%s/" DIR2, t_mountpoint);
+		if (sys_mount(t_device_scratch, t_buf, "ext4", 0, NULL))
+			die("failure: mount");
+
+		fd_fs = openat(-EBADF, t_buf, O_CLOEXEC | O_DIRECTORY);
+		if (fd_fs < 0)
+			die("failure: openat");
+
+		print_r(fd_fs, "");
+
+		exit(EXIT_SUCCESS);
+	}
+	if (wait_for_pid(pid))
+		goto out;
+
+	fret = 0;
+	log_debug("Ran test");
+out:
+	return fret;
+}
+
 static void usage(void)
 {
 	fprintf(stderr, "Description:\n");
@@ -13872,6 +13941,10 @@ struct t_idmapped_mounts t_btrfs[] = {
 /* Test for commit 968219708108 ("fs: handle circular mappings correctly"). */
 struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
 	{ setattr_fix_968219708108,					"test that setattr works correctly",								},
+};
+
+struct t_idmapped_mounts t_always[] = {
+	{ fs_userns_mnt,						"fs_userns_mnt",										},
 };
 
 static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
@@ -14041,6 +14114,9 @@ int main(int argc, char *argv[])
 	if (test_setattr_fix_968219708108 &&
 	    !run_test(t_setattr_fix_968219708108,
 		      ARRAY_SIZE(t_setattr_fix_968219708108)))
+		goto out;
+
+	if (!run_test(t_always, ARRAY_SIZE(t_always)))
 		goto out;
 
 	fret = EXIT_SUCCESS;
