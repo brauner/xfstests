@@ -4,7 +4,7 @@ TOPDIR = ../..
 include $(TOPDIR)/include/builddefs
 
 TARGETS = idmapped-mounts mount-idmapped
-CFILES_IDMAPPED_MOUNTS = idmapped-mounts.c utils.c
+CFILES_IDMAPPED_MOUNTS = vfstest.c utils.c
 CFILES_MOUNT_IDMAPPED = mount-idmapped.c utils.c
 
 HFILES = missing.h utils.h
