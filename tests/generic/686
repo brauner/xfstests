@@ -30,6 +30,11 @@ verb=finsert
 _require_xfs_io_command $verb
 _require_congruent_file_oplen $TEST_DIR 65536
 
+# Due to multiple security issues and potential for subtle bugs around setgid
+# inheritance the rules in the write and chmod/chown paths have been made
+# consistent and are enforced by the VFS since kernel 6.2.
+_fixed_in_kernel_version "v6.2"
+
 junk_dir=$TEST_DIR/$seq
 junk_file=$junk_dir/a
 mkdir -p $junk_dir/
@@ -110,8 +115,8 @@ setup_testfile
 chmod a+rwxs $junk_file
 commit_and_check "" "$verb" 64k 64k
 
-# Commit to a non-exec file by an unprivileged user leaves sgid.
-echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+# Commit to a non-exec file by an unprivileged user clears sgid.
+echo "Test 9 - qa_user, non-exec file $verb"
 setup_testfile
 chmod a+rw,g+rws $junk_file
 commit_and_check "$qa_user" "$verb" 64k 64k
@@ -123,7 +128,7 @@ chmod a+rw,g+rwxs $junk_file
 commit_and_check "$qa_user" "$verb" 64k 64k
 
 # Commit to a user-exec file by an unprivileged user clears sgid
-echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+echo "Test 11 - qa_user, user-exec file $verb"
 setup_testfile
 chmod a+rw,u+x,g+rws $junk_file
 commit_and_check "$qa_user" "$verb" 64k 64k

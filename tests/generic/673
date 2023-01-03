@@ -23,6 +23,12 @@ _require_scratch_reflink
 _scratch_mkfs >> $seqres.full
 _scratch_mount
 _require_congruent_file_oplen $SCRATCH_MNT 1048576
+
+# Due to multiple security issues and potential for subtle bugs around setgid
+# inheritance the rules in the write and chmod/chown paths have been made
+# consistent and are enforced by the VFS since kernel 6.2.
+_fixed_in_kernel_version "v6.2"
+
 chmod a+rw $SCRATCH_MNT/
 
 setup_testfile() {
@@ -102,8 +108,8 @@ setup_testfile
 chmod a+rwxs $SCRATCH_MNT/a
 commit_and_check
 
-#Commit to a non-exec file by an unprivileged user leaves sgid.
-echo "Test 9 - qa_user, non-exec file, only sgid"
+# Commit to a non-exec file by an unprivileged user clears sgid.
+echo "Test 9 - qa_user, non-exec file"
 setup_testfile
 chmod a+rw,g+rws $SCRATCH_MNT/a
 commit_and_check "$qa_user"
@@ -115,7 +121,7 @@ chmod a+rw,g+rwxs $SCRATCH_MNT/a
 commit_and_check "$qa_user"
 
 #Commit to a user-exec file by an unprivileged user clears sgid
-echo "Test 11 - qa_user, user-exec file, only sgid"
+echo "Test 11 - qa_user, user-exec file"
 setup_testfile
 chmod a+rw,u+x,g+rws $SCRATCH_MNT/a
 commit_and_check "$qa_user"
