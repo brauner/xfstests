@@ -2450,7 +2450,7 @@ _yp_active()
 _cat_passwd()
 {
 	[ $(_yp_active) -eq 0 ] && ypcat passwd
-	cat /etc/passwd
+	getent passwd
 }
 
 # cat the group file
